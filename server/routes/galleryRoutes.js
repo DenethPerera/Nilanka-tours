@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { storage } = require('../config/cloudinary'); // 🔥 Cloudinary Storage Engine එක මෙතනට ගන්නවා
+const { storage } = require('../config/cloudinary'); 
 const GalleryImage = require('../models/GalleryImage');
-const auth = require('../middleware/auth'); // Admin විතරක් upload කරන්න
+const auth = require('../middleware/auth'); 
 
-// Init Upload (Cloudinary Storage පාවිච්චි කරලා)
+
 const upload = multer({
-    storage: storage, // 🔥 Local Storage එක අයින් කරලා Cloudinary Storage එක දැම්මා
-    limits: { fileSize: 5000000 }, // 5MB limit
-    // File Type Check එක CloudinaryStorage එකේදී params හරහා කළ හැක, නමුත් මේක ආරක්ෂිතයි
+    storage: storage, 
+    limits: { fileSize: 5000000 }, 
+    
     fileFilter: (req, file, cb) => {
         const filetypes = /jpeg|jpg|png|gif|webp/;
         const extname = filetypes.test(file.originalname.toLowerCase().split('.').pop());
@@ -20,41 +20,49 @@ const upload = multer({
             cb('Error: Images Only!');
         }
     }
-}).single('image'); // Frontend එකෙන් එන field name එක 'image' විය යුතුයි
+}).single('image'); 
 
-// @route   POST /api/gallery
-// @desc    Upload a new image (Admin only)
+
 router.post('/', auth, (req, res) => {
     upload(req, res, async (err) => {
-        if(err){
-            // Multer error or File size error
-            console.error("Multer/Cloudinary Upload Error:", err);
+        // --- 1. HANDLE UPLOAD ERRORS (Multer/Cloudinary) ---
+        if (err instanceof multer.MulterError) {
+            // e.g., File too large (LIMIT_FILE_SIZE)
+            console.error("Multer Error:", err.message);
+            return res.status(400).json({ msg: `Upload Error: ${err.message}` });
+        } else if (err) {
+            // e.g., 'Error: Images Only!' from fileFilter
+            console.error("General Upload Error:", err);
             return res.status(400).json({ msg: err });
         }
-        
-        // req.file නැත්නම් (no file selected)
-        if(req.file == undefined){
+
+        // --- 2. CHECK FOR FILE ---
+        // If the file is undefined, it means no file was selected
+        if (req.file == undefined) {
             return res.status(400).json({ msg: 'No file selected!' });
         }
-        
-        // 🔥 req.file.path වෙනුවට req.file.path or req.file.secure_url එකෙන් Cloudinary URL එක ගන්නවා
+
+        // --- 3. SAVE TO DATABASE (File is now on Cloudinary) ---
         try {
+            // req.file.path or req.file.secure_url contains the Cloudinary URL
             const newImage = new GalleryImage({
-                // Cloudinary වෙතින් ලැබෙන URL එක Save කරන්න
-                imageUrl: req.file.path || req.file.secure_url, 
+                imageUrl: req.file.path || req.file.secure_url,
                 category: req.body.category || 'General'
             });
             await newImage.save();
+            
+            // Log success and return the newly saved image
+            console.log("Image successfully uploaded to Cloudinary and saved to DB.");
             res.json(newImage);
+
         } catch (error) {
-            console.error("Database Save Error:", error);
-            res.status(500).send('Server Error');
+            console.error("Database Save Error:", error.message);
+            res.status(500).send('Server Error during database save.');
         }
     });
 });
 
-// @route   GET /api/gallery
-// @desc    Get all images (මෙතන වෙනස් කරන්න දෙයක් නෑ)
+
 router.get('/', async (req, res) => {
     try {
         const images = await GalleryImage.find().sort({ createdAt: -1 });
