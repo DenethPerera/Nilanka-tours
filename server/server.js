@@ -7,7 +7,10 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: ["http://localhost:5173", "https://nilanka-tours.vercel.app/"],
+    credentials: true
+}));
 
 // Routes (Notice the ./ here, NOT ../)
 app.use('/api/auth', require('./routes/authRoutes'));
