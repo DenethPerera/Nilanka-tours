@@ -85,7 +85,7 @@ const BookingSection = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                     
                     {/* 1. Package Summary (LEFT COLUMN - RESTORED DESIGN) */}
-                    <div className="lg:col-span-1 bg-emerald-900 rounded-xl shadow-2xl text-white h-fit sticky top-10 overflow-hidden">
+                    <div className="lg:col-span-1 bg-emerald-900 rounded-xl shadow-2xl text-white h-fit lg:sticky lg:top-10 overflow-hidden">
                         
                         {/* Image Container */}
                         <div className="relative h-64">
