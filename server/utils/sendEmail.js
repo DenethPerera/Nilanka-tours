@@ -1,10 +1,10 @@
 // utils/sendEmail.js
 const nodemailer = require('nodemailer');
 
-// 🔥 1. dotenv ෆයිල් එක අනිවාර්යයෙන්ම Load කරන්න ඕනේ මෙතනදි.
+
 require('dotenv').config(); 
 
-// 🔥 2. DEBUGGING SECTION (මේකෙන් බලමු පාස්වර්ඩ් එක හරියට එනවද කියලා)
+
 console.log("\n--- 🔍 DEBUGGING SMTP CONFIG ---");
 console.log("SMTP User:", process.env.SMTP_USER);
 
@@ -34,23 +34,28 @@ if (process.env.SMTP_PASS) {
 console.log("--------------------------------\n");
 
 
-// 3. Create Transporter
+
 const transporter = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
-    port: 587,
-    secure: false,
     
-    // 🔥 මෙන්න මේ පේළිය අනිවාර්යයෙන්ම එකතු කරන්න. 
-    // Render Server එකට මේක නැතුව Brevo හොයාගන්න අමාරුයි.
-    family: 4, 
-    
+    port: 587, 
+    secure: false, 
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
     },
+    
+   
+    family: 4,             
+    connectionTimeout: 10000, 
+    greetingTimeout: 5000,    
+    socketTimeout: 10000,    
+    
     tls: {
         rejectUnauthorized: false
-    }
+    },
+    logger: true,
+    debug: true
 });
 
 
@@ -64,9 +69,9 @@ transporter.verify(function (error, success) {
 
 const sendEmail = async (mailOptions) => {
     try {
-        // 🔥 මෙන්න මේ කොටස අලුතින් දාන්න
+        
         const message = {
-            from: "Sajith Tours <deneth676@gmail.com", // ⚠️ අනිවාර්යයෙන්ම ඔයාගේ Verify කරපු Email එක මෙතන තියෙන්න ඕනේ
+            from: "Sajith Tours <deneth676@gmail.com", 
             to: mailOptions.to,
             subject: mailOptions.subject,
             html: mailOptions.html,
