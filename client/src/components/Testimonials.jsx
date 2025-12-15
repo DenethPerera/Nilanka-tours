@@ -46,7 +46,7 @@ const Testimonials = () => {
     setStatus('loading');
     
     try {
-      await axios.post('http://localhost:5000/api/reviews', {
+      await axios.post('/api/reviews', {
         bookingId,
         rating,
         comment
