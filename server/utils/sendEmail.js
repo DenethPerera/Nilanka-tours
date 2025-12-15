@@ -38,18 +38,20 @@ console.log("--------------------------------\n");
 const transporter = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
     
-    port: 587, 
+    
+    port: 2525, 
+    
     secure: false, 
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
     },
     
-   
+    
     family: 4,             
     connectionTimeout: 10000, 
     greetingTimeout: 5000,    
-    socketTimeout: 10000,    
+    socketTimeout: 10000,     
     
     tls: {
         rejectUnauthorized: false
@@ -57,7 +59,6 @@ const transporter = nodemailer.createTransport({
     logger: true,
     debug: true
 });
-
 
 transporter.verify(function (error, success) {
     if (error) {
