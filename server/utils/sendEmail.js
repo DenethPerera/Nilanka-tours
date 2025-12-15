@@ -38,13 +38,16 @@ console.log("--------------------------------\n");
 const transporter = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
     port: 587,
-    secure: false, 
+    secure: false,
+    
+    // 🔥 මෙන්න මේ පේළිය අනිවාර්යයෙන්ම එකතු කරන්න. 
+    // Render Server එකට මේක නැතුව Brevo හොයාගන්න අමාරුයි.
+    family: 4, 
+    
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
     },
-    logger: true,
-    debug: true,
     tls: {
         rejectUnauthorized: false
     }
